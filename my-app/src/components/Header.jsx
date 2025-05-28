@@ -38,6 +38,11 @@ const Header = () => {
                   <Link to="/upload-courses" style={linkStyle}>Upload Courses</Link>
                 </li>
               )}
+               {role === 'student' && (
+                <li style={navItemStyle}>
+                  <Link to="/enrolled-courses" style={linkStyle}>Enrolled Courses</Link>
+                </li>
+              )}
               <li style={navItemStyle}>
                 <Link to="/dashboard" style={linkStyle}>Dashboard</Link>
               </li>

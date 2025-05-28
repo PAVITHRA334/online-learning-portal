@@ -6,12 +6,18 @@ const path = require('path');
 const fs = require('fs');
 const Course = require('./models/Course');
 const Quiz = require('./models/Quiz');
+const User = require('./models/User'); // Ensure User model is imported
 const quizRoutes = require("./routes/quiz"); 
 const courseRoutes = require("./routes/course");
+const authRoutes = require("./routes/authRoutes"); // Fix import
+const dotenv = require("dotenv");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const app = express();
-app.use(cors());
+const progressRoutes = require("./routes/progressRoutes");
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
-
+dotenv.config(); 
 const uploadDirs = ["uploads", "uploads/images"];
 uploadDirs.forEach(dir => {
   if (!fs.existsSync(dir)) {
@@ -217,23 +223,6 @@ app.put('/quizzes/:id', async (req, res) => {
   }
 });
 
-
-// DELETE quiz by ID
-app.delete('/quizzes/:id', async (req, res) => {
-  try {
-    const quizId = req.params.id;
-    const deletedQuiz = await Quiz.findByIdAndDelete(quizId);
-
-    if (!deletedQuiz) {
-      return res.status(404).json({ message: 'Quiz not found' });
-    }
-
-    res.status(200).json({ message: 'Quiz deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting quiz:', error);
-    res.status(500).json({ message: 'Failed to delete quiz', error });
-  }
-});
 app.get('/dashboard/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -262,7 +251,33 @@ app.get('/dashboard/:id', async (req, res) => {
 });
 app.use("/api/quiz", quizRoutes); 
 app.use("/api/course", courseRoutes); 
+app.use("/api", authRoutes);
+const enrollRoutes = require("./routes/enrollRoutes");
+
+app.use("/api/enroll", enrollRoutes);
+app.use("/api/progress", progressRoutes);
+app.get("/api/enrolled-courses", async (req, res) => {
+  try {
+    console.log("Fetching enrolled courses...");
+
+    const userId = req.user?.id; // Ensure user authentication
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized. User not logged in." });
+    }
+
+    console.log("User ID:", userId);
+
+    const enrolledCourses = await EnrolledCourse.find({ userId }).populate("courseId");
+
+    console.log("Enrolled courses found:", enrolledCourses);
+
+    res.json(enrolledCourses);
+  } catch (error) {
+    console.error("Error fetching enrolled courses:", error);
+    res.status(500).json({ message: "Failed to fetch enrolled courses." });
+  }
+});
 
 app.listen(5000, () => {
   console.log('🚀 Server running on http://localhost:5000');
-});
+}); 

@@ -1,35 +1,43 @@
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';  
-import { useAuth } from './AuthContext'; 
-import './login.css';
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import { useAuth } from "./AuthContext";
+import "./login.css";
+
 const LoginPage = () => {
-  const [role, setRole] = useState('student');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [email, setEmail] = useState('');
+  const [role, setRole] = useState("student"); // Default role
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation(); 
+  const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const redirectTo = queryParams.get('redirectTo') || '/';  
-  const authenticate = (username, password) => {
-    return username === 'user' && password === 'p'; 
-  };
-  const handleSubmit = (e) => {
+  const redirectTo = queryParams.get("redirectTo") || "/";
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const isAuthenticated = authenticate(username, password);
-    if (isAuthenticated) {
-      const userDetails = {  email,  username };
-      login(role, userDetails); 
-      if (role === 'student') {
-        navigate(redirectTo || '/explore-courses');
-      } else if (role === 'instructor') {
-        navigate('/'); 
-      }
-    } else {
-      alert('Invalid credentials!');
+    try {
+      const response = await axios.post("http://localhost:5000/api/login", {
+        email,
+        password,
+        role, // Send role in the request
+      });
+
+      const { token, user } = response.data;
+
+      login(user.role, { email: user.email, username: user.username, token });
+
+      // Redirect based on role
+      if (user.role === "student") navigate(redirectTo || "/");
+      else if (user.role === "instructor") navigate("/");
+      else if (user.role === "admin") navigate("/");
+      else navigate("/");
+
+    } catch (error) {
+      alert(error.response?.data?.message || "Login failed! Please try again.");
     }
   };
+
   return (
     <div className="login-container">
       <h2>Login</h2>
@@ -40,8 +48,8 @@ const LoginPage = () => {
               type="radio"
               name="role"
               value="student"
-              checked={role === 'student'}
-              onChange={() => setRole('student')}
+              checked={role === "student"}
+              onChange={() => setRole("student")}
             />
             Student
           </label>
@@ -50,10 +58,20 @@ const LoginPage = () => {
               type="radio"
               name="role"
               value="instructor"
-              checked={role === 'instructor'}
-              onChange={() => setRole('instructor')}
+              checked={role === "instructor"}
+              onChange={() => setRole("instructor")}
             />
             Instructor
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="role"
+              value="admin"
+              checked={role === "admin"}
+              onChange={() => setRole("admin")}
+            />
+            Admin
           </label>
         </div>
         <div className="input-group">
@@ -63,16 +81,6 @@ const LoginPage = () => {
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div className="input-group">
-          <label htmlFor="username">Username</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
             required
           />
         </div>
@@ -88,6 +96,9 @@ const LoginPage = () => {
         </div>
         <button type="submit">Login</button>
       </form>
+      <p>
+        Don't have an account? <a href="/signup">Sign up</a>
+      </p>
     </div>
   );
 };

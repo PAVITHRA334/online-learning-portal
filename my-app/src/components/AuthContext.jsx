@@ -1,38 +1,36 @@
-import React, { createContext, useState, useContext } from 'react';
+import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [loggedIn, setLoggedIn] = useState(false);
-  const [role, setRole] = useState('student');
-  const [userDetails, setUserDetails] = useState(null); 
-  const [allUsers, setAllUsers] = useState([]); 
+  const [role, setRole] = useState(null);
 
-  const login = (role, userDetails) => {
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const storedRole = localStorage.getItem("role");
+    if (token && storedRole) {
+      setLoggedIn(true);
+      setRole(storedRole);
+    }
+  }, []);
+
+  const login = (userRole, userDetails) => {
+    localStorage.setItem("role", userRole);
+    localStorage.setItem("token", userDetails.token);
+    localStorage.setItem("username", userDetails.username);
     setLoggedIn(true);
-    setRole(role);
-    setUserDetails(userDetails);
+    setRole(userRole);
   };
 
   const logout = () => {
+    localStorage.clear();
     setLoggedIn(false);
-    setRole('student');
-    setUserDetails(null);
-    setAllUsers([]);
-  };
-
-  const fetchAllUsers = async () => {
-    if (role === 'admin') {
-      const users = [
-        { name: 'John Doe', email: 'john@example.com', role: 'student' },
-        { name: 'Jane Smith', email: 'jane@example.com', role: 'instructor' }
-      ];
-      setAllUsers(users);
-    }
+    setRole(null);
   };
 
   return (
-    <AuthContext.Provider value={{ loggedIn, role, userDetails, allUsers, login, logout, fetchAllUsers }}>
+    <AuthContext.Provider value={{ loggedIn, role, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
