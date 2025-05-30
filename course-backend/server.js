@@ -256,28 +256,81 @@ const enrollRoutes = require("./routes/enrollRoutes");
 
 app.use("/api/enroll", enrollRoutes);
 app.use("/api/progress", progressRoutes);
-app.get("/api/enrolled-courses", async (req, res) => {
+
+
+app.get('/users', async (req, res) => {
   try {
-    console.log("Fetching enrolled courses...");
+    const users = await User.find();
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
-    const userId = req.user?.id; // Ensure user authentication
-    if (!userId) {
-      return res.status(401).json({ message: "Unauthorized. User not logged in." });
-    }
+// DELETE a user
+app.delete('/users/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const deletedUser = await User.findByIdAndDelete(userId);
+    if (!deletedUser) return res.status(404).json({ message: 'User not found' });
+    res.status(200).json({ message: '✅ User deleted successfully' });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
-    console.log("User ID:", userId);
+// UPDATE user role
+app.put('/users/:id/role', async (req, res) => {
+  try {
+    const { role } = req.body;
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, { role }, { new: true });
+    if (!updatedUser) return res.status(404).json({ message: 'User not found' });
+    res.status(200).json({ message: '✅ Role updated', user: updatedUser });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+// DELETE a quiz
+app.delete('/quizzes/:id', async (req, res) => {
+  try {
+    const quizId = req.params.id;
+    const deletedQuiz = await Quiz.findByIdAndDelete(quizId);
+    if (!deletedQuiz) return res.status(404).json({ message: 'Quiz not found' });
+    res.status(200).json({ message: '✅ Quiz deleted successfully' });
+  } catch (error) {
+    console.error("Error deleting quiz:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+const authenticate = require("./middleware/authenticate");
+const Enrollment = require("./models/Enrollment");
 
-    const enrolledCourses = await EnrolledCourse.find({ userId }).populate("courseId");
 
-    console.log("Enrolled courses found:", enrolledCourses);
+app.get("/api/enrolled-courses", authenticate, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    console.log("User ID from token:", userId);
 
-    res.json(enrolledCourses);
+    const enrollments = await Enrollment.find({ user: userId })
+      .populate({
+        path: "course",
+        populate: { path: "lessons" }
+      });
+
+    console.log("Enrollments fetched:", enrollments);
+
+    const courses = enrollments.map((enrollment) => ({
+      courseId: enrollment.course,
+    }));
+
+    res.json(courses);
   } catch (error) {
     console.error("Error fetching enrolled courses:", error);
     res.status(500).json({ message: "Failed to fetch enrolled courses." });
   }
 });
-
 app.listen(5000, () => {
   console.log('🚀 Server running on http://localhost:5000');
 }); 

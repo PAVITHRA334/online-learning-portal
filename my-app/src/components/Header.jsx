@@ -43,9 +43,21 @@ const Header = () => {
                   <Link to="/enrolled-courses" style={linkStyle}>Enrolled Courses</Link>
                 </li>
               )}
-              <li style={navItemStyle}>
-                <Link to="/dashboard" style={linkStyle}>Dashboard</Link>
-              </li>
+               {role === 'admin' && (
+                <li style={navItemStyle}>
+                  <Link to="/course-management" style={linkStyle}>Course management</Link>
+                </li>
+              )}
+               {role === 'admin' && (
+                <li style={navItemStyle}>
+                  <Link to="/quiz-management" style={linkStyle}>quiz management</Link>
+                </li>
+              )}
+               {role === 'admin' && (
+                <li style={navItemStyle}>
+                  <Link to="/user-management" style={linkStyle}>user management</Link>
+                </li>
+              )}
               <li>
                 <Link to="/" style={linkStyle} onClick={handleLogout}>Logout</Link>
               </li>
