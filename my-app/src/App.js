@@ -16,6 +16,7 @@ import Footer from './components/Footer';
 import CourseManagement from './pages/CourseManagement';
 import QuizManagement from './pages/QuizManagement';
 import UserManagement from './pages/UserManagement'; 
+
 import './App.css';
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
                     <Route path="/user-management" element={<UserManagement />} />
         <Route path="/course-management" element={<CourseManagement />} />
         <Route path="/quiz-management" element={<QuizManagement />} />
+
                 </Routes>
               </div>
             </div>

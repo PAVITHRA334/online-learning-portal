@@ -5,7 +5,6 @@ const UploadCourses = () => {
   const [courseId, setCourseId] = useState(null);
   const [courseName, setCourseName] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
-  const [coursePrice, setCoursePrice] = useState("");
   const [courseImageUrl, setCourseImageUrl] = useState("");
   const [modules, setModules] = useState([
     { title: "", units: [{ title: "", videoUrl: "", pdfUrl: "" }] }
@@ -42,7 +41,6 @@ const UploadCourses = () => {
     setCourseId(course._id);
     setCourseName(course.title);
     setCourseDescription(course.description);
-    setCoursePrice(course.price);
     setCourseImageUrl(course.imageUrl);
     setModules(course.modules);
   };
@@ -51,7 +49,6 @@ const UploadCourses = () => {
     const formData = new FormData();
     formData.append("title", courseName);
     formData.append("description", courseDescription);
-    formData.append("price", coursePrice);
     formData.append("imageUrl", courseImageUrl);
     formData.append("modules", JSON.stringify(modules));
     try {
@@ -68,7 +65,6 @@ const UploadCourses = () => {
       setCourseId(null);
       setCourseName("");
       setCourseDescription("");
-      setCoursePrice("");
       setCourseImageUrl("");
       setModules([{ title: "", units: [{ title: "", videoUrl: "", pdfUrl: "" }] }]);
       fetchCourses();
@@ -88,10 +84,7 @@ const UploadCourses = () => {
           <label>Course Description:</label>
           <input type="text" value={courseDescription} onChange={(e) => setCourseDescription(e.target.value)} required />
         </div>
-        <div className="form-group">
-          <label>Course Price:</label>
-          <input type="text" value={coursePrice} onChange={(e) => setCoursePrice(e.target.value)} required />
-        </div>
+       
         <div className="form-group">
           <label>Course Image URL:</label>
           <input type="text" value={courseImageUrl} onChange={(e) => setCourseImageUrl(e.target.value)} required />

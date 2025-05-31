@@ -38,7 +38,7 @@ const Header = () => {
                   <Link to="/upload-courses" style={linkStyle}>Upload Courses</Link>
                 </li>
               )}
-               {role === 'student' && (
+               {(role === 'student' ||role === 'instructor' ||role === 'admin')&& (
                 <li style={navItemStyle}>
                   <Link to="/enrolled-courses" style={linkStyle}>Enrolled Courses</Link>
                 </li>

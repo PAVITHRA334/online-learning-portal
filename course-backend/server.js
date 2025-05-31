@@ -307,23 +307,28 @@ app.delete('/quizzes/:id', async (req, res) => {
 const authenticate = require("./middleware/authenticate");
 const Enrollment = require("./models/Enrollment");
 
-
 app.get("/api/enrolled-courses", authenticate, async (req, res) => {
   try {
-    const userId = req.user.userId;
-    console.log("User ID from token:", userId);
+    const userId = req.user.userId || req.user.id;
 
-    const enrollments = await Enrollment.find({ user: userId })
-      .populate({
-        path: "course",
-        populate: { path: "lessons" }
-      });
+    const enrollments = await Enrollment.find({ user: userId }).populate("course");
 
-    console.log("Enrollments fetched:", enrollments);
+    const courses = enrollments.map((enrollment) => {
+      // Flatten all lessons from modules.units into one array
+      const lessons = (enrollment.course.modules || []).reduce((acc, module) => {
+        return acc.concat(module.units || []);
+      }, []);
 
-    const courses = enrollments.map((enrollment) => ({
-      courseId: enrollment.course,
-    }));
+      return {
+        courseId: {
+          _id: enrollment.course._id,
+          title: enrollment.course.title,
+          imageUrl: enrollment.course.imageUrl,
+          description: enrollment.course.description,
+          lessons, // flat lessons array here
+        },
+      };
+    });
 
     res.json(courses);
   } catch (error) {
@@ -331,6 +336,8 @@ app.get("/api/enrolled-courses", authenticate, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch enrolled courses." });
   }
 });
+
+
 app.listen(5000, () => {
   console.log('🚀 Server running on http://localhost:5000');
 }); 

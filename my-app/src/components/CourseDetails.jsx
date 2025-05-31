@@ -14,7 +14,6 @@ const CourseDetails = () => {
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [completedLessons, setCompletedLessons] = useState([]);
-  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -29,7 +28,6 @@ const CourseDetails = () => {
         if (response.data.enrolled) {
           const progressResponse = await axios.get(`http://localhost:5000/api/enrollment/${courseId}`, { headers });
           setCompletedLessons(progressResponse.data.completedLessons || []);
-          setProgress(progressResponse.data.progress || 0);
         }
       } catch (err) {
         setError("Failed to load course details.");
@@ -66,38 +64,6 @@ const CourseDetails = () => {
     }
   };
   
-const handleCompleteLesson = async (lessonId) => {
-  if (!isEnrolled) return alert("⚠️ Enrollment required to complete lessons.");
-
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("⚠️ Authentication required. Please log in again.");
-      return;
-    }
-
-    const response = await axios.post(  // ✅ Ensure it's a POST request
-      "http://localhost:5000/api/progress/update",
-      { courseId, lessonId },  // ✅ Send data in the request body
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-
-    if (response.data.success) {
-      setCompletedLessons((prev) => [...prev, lessonId]);
-      alert("🎉 Lesson marked as completed!");
-    } else {
-      throw new Error("Unexpected API response");
-    }
-
-  } catch (err) {
-    console.error("Error updating progress:", err.response ? err.response.data : err);
-    alert("⚠️ Failed to update progress.");
-  }
-};
-
-
-
-
 
   if (loading) return <p className="loading">⏳ Loading course details...</p>;
   if (error) return <p className="error">❌ {error}</p>;
@@ -120,9 +86,7 @@ const handleCompleteLesson = async (lessonId) => {
           ) : (
             <p className="no-content">🚫 No PDF available</p>
           )}
-          {!completedLessons.includes(selectedLesson._id) && (
-            <button className="complete-btn" onClick={() => handleCompleteLesson(selectedLesson._id)}>✔ Mark as Completed</button>
-          )}
+          
         </div>
       ) : (
         <>
@@ -131,7 +95,6 @@ const handleCompleteLesson = async (lessonId) => {
             <div className="course-info">
               <h2>{course.title}</h2>
               <p>{course.description}</p>
-              <p className="course-duration">⏳ Duration: {course.duration} hours</p>
               {!isEnrolled ? (
                 <button className="enroll-btn" onClick={handleEnroll}>🎓 Enroll Now</button>
               ) : (
@@ -141,14 +104,7 @@ const handleCompleteLesson = async (lessonId) => {
             </div>
           </div>
 
-          {isEnrolled && (
-            <div className="progress-container">
-              <p className="progress-text">📈 Progress: {progress}%</p>
-              <div className="progress-bar">
-                <div className="progress" style={{ width: `${progress}%` }}></div>
-              </div>
-            </div>
-          )}
+        
 
           <h3 className="module-heading">📚 Course Modules</h3>
           {course.modules?.length > 0 ? (
