@@ -2,9 +2,7 @@ const mongoose = require("mongoose");
 const CourseSchema = new mongoose.Schema({
   title: String,
   description: String,
-  price: String,
   imageUrl: String,
-  duration: String, 
   modules: [
     {
       title: String,

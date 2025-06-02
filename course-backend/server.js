@@ -14,7 +14,6 @@ const dotenv = require("dotenv");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const app = express();
-const progressRoutes = require("./routes/progressRoutes");
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
 dotenv.config(); 
@@ -74,11 +73,7 @@ app.post('/courses', upload.fields([
   { name: 'image', maxCount: 1 }
 ]), async (req, res) => {
   try {
-    let { title, description, price, imageUrl, duration, modules } = req.body;
-    price = Number(price);
-    if (isNaN(price)) {
-      return res.status(400).json({ message: 'Price must be a valid number' });
-    }
+    let { title, description, imageUrl, duration, modules } = req.body;
 
     if (typeof modules === 'string') {
       try {
@@ -95,7 +90,6 @@ app.post('/courses', upload.fields([
     const newCourse = new Course({
       title,
       description,
-      price,
       imageUrl: imageFile,
       duration,
       modules: Array.isArray(modules) ? modules : [],
@@ -117,7 +111,7 @@ app.put('/courses/:id', upload.fields([
   { name: 'image', maxCount: 1 }
 ]), async (req, res) => {
   const { id } = req.params;
-  const { title, description, price, imageUrl, modules } = req.body;
+  const { title, description, imageUrl, modules } = req.body;
   const videoFiles = req.files?.videos || [];
   const pdfFiles = req.files?.pdfs || [];
   const imageFile = req.files?.image ? req.files.image[0].filename : imageUrl;
@@ -137,7 +131,52 @@ app.put('/courses/:id', upload.fields([
       {
         title,
         description,
-        price,
+        imageUrl: imageFile,
+        modules: parsedModules,
+        videos: videoFiles.map(file => file.filename),
+        pdfs: pdfFiles.map(file => file.filename)
+      },
+      { new: true }
+    );
+
+    if (!updatedCourse) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    res.status(200).json(updatedCourse);
+  } catch (error) {
+    console.error('Error updating course:', error);
+    res.status(500).json({ message: 'Error updating course', error });
+  }
+});
+
+
+app.put('/courses/:id', upload.fields([
+  { name: 'videos', maxCount: 10 },
+  { name: 'pdfs', maxCount: 10 },
+  { name: 'image', maxCount: 1 }
+]), async (req, res) => {
+  const { id } = req.params;
+  const { title, description, imageUrl, modules } = req.body;
+  const videoFiles = req.files?.videos || [];
+  const pdfFiles = req.files?.pdfs || [];
+  const imageFile = req.files?.image ? req.files.image[0].filename : imageUrl;
+
+  try {
+    let parsedModules = [];
+    if (typeof modules === 'string') {
+      try {
+        parsedModules = JSON.parse(modules);
+      } catch (error) {
+        return res.status(400).json({ message: 'Invalid modules format' });
+      }
+    }
+
+    const updatedCourse = await Course.findByIdAndUpdate(
+      id,
+      {
+        title,
+        description,
         imageUrl: imageFile,
         modules: parsedModules,
         videos: videoFiles.map(file => file.filename),
@@ -255,7 +294,6 @@ app.use("/api", authRoutes);
 const enrollRoutes = require("./routes/enrollRoutes");
 
 app.use("/api/enroll", enrollRoutes);
-app.use("/api/progress", progressRoutes);
 
 
 app.get('/users', async (req, res) => {
