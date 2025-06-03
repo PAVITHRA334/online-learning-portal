@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "./AuthContext";
 import "./login.css";
-
+import swal from 'sweetalert';
 const LoginPage = () => {
   const [role, setRole] = useState("student"); // Default role
   const [email, setEmail] = useState("");
@@ -34,7 +34,7 @@ const LoginPage = () => {
       else navigate("/");
 
     } catch (error) {
-      alert(error.response?.data?.message || "Login failed! Please try again.");
+      swal(error.response?.data?.message || "Login failed! Please try again.");
     }
   };
 

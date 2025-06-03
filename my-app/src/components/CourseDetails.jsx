@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "./AuthContext";
 import "./courseDetails.css";
+import swal from 'sweetalert';
 
 const CourseDetails = () => {
   const { courseId } = useParams();
@@ -44,7 +45,7 @@ const CourseDetails = () => {
     try {
       const storedToken = localStorage.getItem("token"); 
       if (!storedToken) {
-        alert("You need to log in first!");
+        swal("You need to log in first!");
         return;
       }
   
@@ -56,11 +57,11 @@ const CourseDetails = () => {
         { headers: { Authorization: `Bearer ${storedToken}` } }
       );
   
-      alert(response.data.message);
+     swal(response.data.message);
       setIsEnrolled(true);  // ✅ Update UI immediately
     } catch (err) {
       console.error("🚨 Enrollment error:", err.response?.data || err.message);
-      alert(err.response?.data?.error || "Enrollment failed. Please try again.");
+      swal(err.response?.data?.error || "Enrollment failed. Please try again.");
     }
   };
   

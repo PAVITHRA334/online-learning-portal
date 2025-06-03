@@ -78,7 +78,7 @@ const Practice = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>Coding Practice Quizzes</h1>
+      <h1>Practice Quizzes</h1>
       <div
         style={{
           display: "grid",

@@ -90,10 +90,10 @@ const CourseList = ({ searchQuery }) => {
           </div>
 
           {filteredCourses.length > visibleCourses && (
-            <p className="show-more" onClick={handleShowMore}>Show More</p>
+            <p className="show-more" onClick={handleShowMore}>Show More ↓</p>
           )}
           {visibleCourses > 5 && (
-            <p className="show-less" onClick={handleShowLess}>Show Less</p>
+            <p className="show-less" onClick={handleShowLess}>Show Less ↑</p>
           )}
         </>
       )}

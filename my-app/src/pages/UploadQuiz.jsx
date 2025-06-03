@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './UploadQuiz.css';
+import swal from 'sweetalert';
 const UploadQuiz = () => {
   const [quizId, setQuizId] = useState(null);
   const [quizTitle, setQuizTitle] = useState('');
@@ -78,7 +79,7 @@ const UploadQuiz = () => {
         );
       }
       console.log('Response from server:', response.data);
-      alert(`Quiz "${quizTitle}" has been ${quizId ? 'updated' : 'uploaded'}!`);
+      swal(`Quiz "${quizTitle}" has been ${quizId ? 'updated' : 'uploaded'}!`);
       setQuizId(null);
       setQuizTitle('');
       setQuizDescription('');
@@ -86,7 +87,7 @@ const UploadQuiz = () => {
       fetchQuizzes();
     } catch (error) {
       console.error('Error saving quiz:', error.response ? error.response.data : error.message);
-      alert(error.response?.data?.message || 'Error saving quiz. Check the console for details.');
+     swal(error.response?.data?.message || 'Error saving quiz. Check the console for details.');
     }
   };
   const editQuiz = (quiz) => {
@@ -100,11 +101,11 @@ const UploadQuiz = () => {
 
     try {
       await axios.delete(`http://localhost:5000/quizzes/${id}`);
-      alert('Quiz deleted successfully!');
+      swal('Quiz deleted successfully!');
       fetchQuizzes();
     } catch (error) {
       console.error('Error deleting quiz:', error);
-      alert('Error deleting quiz.');
+      swal('Error deleting quiz.');
     }
   };
 

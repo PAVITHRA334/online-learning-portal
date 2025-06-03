@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-
+import swal from 'sweetalert';
 const SignupPage = () => {
   const [role, setRole] = useState('student');
   const [email, setEmail] = useState('');
@@ -19,11 +19,11 @@ const SignupPage = () => {
         role
       });
 
-      alert('Signup successful! Please log in.');
+      swal('Signup successful! Please log in.');
       navigate('/login');  // Redirect to login page
 
     } catch (error) {
-      alert(error.response?.data?.message || 'Signup failed! Please try again.');
+      swal(error.response?.data?.message || 'Signup failed! Please try again.');
     }
   };
 

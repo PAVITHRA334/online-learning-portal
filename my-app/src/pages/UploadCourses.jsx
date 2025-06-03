@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "./UploadCourses.css";
+import swal from 'sweetalert';
 const UploadCourses = () => {
   const [courseId, setCourseId] = useState(null);
   const [courseName, setCourseName] = useState("");
@@ -31,7 +32,7 @@ const UploadCourses = () => {
     if (!window.confirm("Are you sure you want to delete this course?")) return;
     try {
       await axios.delete(`http://localhost:5000/courses/${id}`);
-      alert("Course deleted successfully!");
+     swal("Course deleted successfully!");
       fetchCourses();
     } catch (error) {
       console.error("Error deleting course:", error);
@@ -61,7 +62,7 @@ const UploadCourses = () => {
           headers: { "Content-Type": "multipart/form-data" }
         });
       }
-      alert(`Course "${courseName}" has been ${courseId ? "updated" : "uploaded"}!`);
+      swal(`Course "${courseName}" has been ${courseId ? "updated" : "uploaded"}!`);
       setCourseId(null);
       setCourseName("");
       setCourseDescription("");

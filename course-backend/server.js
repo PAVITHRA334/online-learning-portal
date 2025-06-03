@@ -6,13 +6,9 @@ const path = require('path');
 const fs = require('fs');
 const Course = require('./models/Course');
 const Quiz = require('./models/Quiz');
-const User = require('./models/User'); // Ensure User model is imported
-const quizRoutes = require("./routes/quiz"); 
-const courseRoutes = require("./routes/course");
+const User = require('./models/User'); 
 const authRoutes = require("./routes/authRoutes"); // Fix import
 const dotenv = require("dotenv");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const app = express();
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
@@ -261,35 +257,6 @@ app.put('/quizzes/:id', async (req, res) => {
     res.status(500).json({ message: 'Failed to update quiz', error });
   }
 });
-
-app.get('/dashboard/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    if (!id) {
-      return res.status(400).json({ message: 'Invalid instructor ID' });
-    }
-
-    const instructor = await User.findById(id)
-      .populate('uploadedCourses')
-      .populate('uploadedQuizzes')
-      .lean(); 
-
-    if (!instructor) {
-      return res.status(404).json({ message: 'Instructor not found' });
-    }
-
-    res.status(200).json({
-      uploadedCourses: instructor.uploadedCourses || [],
-      uploadedQuizzes: instructor.uploadedQuizzes || [],
-    });
-  } catch (error) {
-    console.error('Error fetching dashboard data:', error);
-    res.status(500).json({ message: 'Internal server error', error: error.message });
-  }
-});
-app.use("/api/quiz", quizRoutes); 
-app.use("/api/course", courseRoutes); 
 app.use("/api", authRoutes);
 const enrollRoutes = require("./routes/enrollRoutes");
 
@@ -374,6 +341,8 @@ app.get("/api/enrolled-courses", authenticate, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch enrolled courses." });
   }
 });
+
+
 
 
 app.listen(5000, () => {
